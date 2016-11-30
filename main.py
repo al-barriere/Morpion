@@ -30,5 +30,3 @@ def main():
         print("You win !")
     else:
         print("you loose !")
-
-main()
