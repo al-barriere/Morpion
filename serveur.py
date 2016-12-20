@@ -37,5 +37,4 @@ print("En attente de joueurs...")
 threading.Thread(None,f,None).start()
 while True :
     if nbPlayer >= 2 :
-        os.system('clear')
-        main()
+        print(nbPlayer,"joueurs sont connectés")

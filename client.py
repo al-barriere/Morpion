@@ -4,11 +4,14 @@ import select
 import threading
 import sys
 
-l = []
-clientAddr = []
 s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-s.connect((sys.argv[1],7777))
-s.send(b"Connected")
+try:
+    s.connect((sys.argv[1],7777))
+except Exception as e:
+    #print(e)
+    input("Erreur de connexion au serveur ! Appuyer sur n'importe quelle touche pour sortir")
+    sys.exit()
+
 while True:
-    pass
+
 s.close()
