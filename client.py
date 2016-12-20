@@ -13,5 +13,6 @@ except Exception as e:
     sys.exit()
 
 while True:
-
+    data = s.recv(1500)
+    print(data)
 s.close()
