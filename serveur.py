@@ -11,7 +11,7 @@ inGame = False
 s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM,0)
 l = []
 clientAddr = []
-
+grid = grid() # Une seule grille logique
 #Effectue les connexions
 def f():
     while True:
@@ -43,3 +43,5 @@ while True :
         #Envoie du premier msg => définit J1
         b = bytearray("J1","utf-8")
         l[1].send(b)
+        b = bytearray("J2","utf-8")
+        l[2].send(b)
