@@ -1,0 +1,3 @@
+bytearray() permet de convertir un type (int , string) en un bytes
+  Pour un int => b = bytearray([int])
+  Pour un string => b = bytearray([string,[encodage]])

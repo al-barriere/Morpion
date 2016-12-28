@@ -15,7 +15,6 @@ clientAddr = []
 #Effectue les connexions
 def f():
     while True:
-        print("coucou")
         lSocket = select.select(l,[],[])[0]
         for newS in lSocket:
             global s
@@ -41,5 +40,6 @@ while True :
     if nbPlayer >= 2 and inGame == False :
         print("Début d'une partie")
         inGame = True
-        tmp = "10"
-        s.sendto(tmp.encode("utf-8"), (clientAddr[0],7777))
+        #Envoie du premier msg => définit J1
+        b = bytearray("J1","utf-8")
+        l[1].send(b)
