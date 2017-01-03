@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import socket
 import select
 import threading
@@ -20,7 +20,7 @@ while True:
     if data.decode("utf-8") == "J1" :
         whoIAm = "J1"
         break
-    else if data.decode("utf-8") == "J2" :
+    elif data.decode("utf-8") == "J2" :
         whoIAm = "J2"
         break
 
@@ -30,9 +30,9 @@ print("Vous êtes", whoIAm)
 
 #Partie Joueur
 if whoIAm != "spectator" :
-    while grids[0].gameOver() == -1 :
+    while grid.gameOver() == -1 :
        pass
 #Partie spectateur
 else :
-
-s.close()
+    pass
+#s.close()
