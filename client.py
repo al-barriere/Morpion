@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import socket
 import select
 import threading
+from grid import *
 import sys
-#from grid import *
 
 whoIAm = "spectator"
-#grids = [grid(), grid()] #une logique et une graphique, différentes si joueur, identique si spectateur
+grid = grid() #une grille graphique uniquement, la logique étant gérée sur le serveur
 s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+
 try:
     s.connect((sys.argv[1],7777))
 except Exception as e:
@@ -16,7 +17,6 @@ except Exception as e:
 
 while True:
     data = s.recv(1500)
-    input("coucou")
     if data.decode("utf-8") == "J1" :
         whoIAm = "J1"
         break
@@ -24,8 +24,15 @@ while True:
         whoIAm = "J2"
         break
 
-print(whoIAm)
-input("BLBLB")
-#while grids[0].gameOver() == -1 :
-#    pass
+ACK = bytearray("ACK","utf-8")
+s.send(ACK)
+print("Vous êtes", whoIAm)
+
+#Partie Joueur
+if whoIAm != "spectator" :
+    while grids[0].gameOver() == -1 :
+       pass
+#Partie spectateur
+else :
+
 s.close()
