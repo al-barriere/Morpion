@@ -54,24 +54,24 @@ while True :
         l[2].send(b)
 
         #Accusé de reception
-        while True:
+        while True :
             ACK_J1 = l[1].recv[1500]
             ACK_J2 = l[2].recv[1500]
             if ACK_J1.decode("utf-8") == "ACK" :
                 J1_OK = True
             if ACK_J2.decode("utf-8") == "ACK" :
                 J2_OK = True
-            if J1_OK && J2_OK :
+            if J1_OK == True and J2_OK == True :
                 break;
 
         #Partie Jeu
         current_player = 1
-        while grid.gameOver() == -1:
+        while grid.gameOver() == -1 :
             data = l[current_player].recv(1500)
             if not data : break
             shot = int(data.decode("utf-8"))
 
-            if (grid.cells[shot] != EMPTY):
+            if grid.cells[shot] != 0 :
                 answer = bytearray("NO", "utf-8")
                 l[current_player].send(answer)
             else:
