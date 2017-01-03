@@ -2,12 +2,15 @@
 import socket
 import select
 import threading
+import binascii
 from grid import *
 import os
 
-def ACK(l, current_player):
+def ACK(player):
     while True:
-        ACK = l[current_player].recv[1500]
+        global l
+        print("je suis la")
+        ACK = l[player].recv(1500)
         if ACK.decode("utf-8") == "ACK":
             break;
 
@@ -25,6 +28,9 @@ def conect():
                 global clientAddr
                 clientAddr.append(addr)
                 l.append(otherS)
+                if nbPlayer > 2 :
+                    msg = bytearray("spectator", "utf-8")
+                    otherS.send(msg)
 
 nbPlayer = 0
 inGame = False
@@ -44,6 +50,7 @@ print("En attente de joueurs...")
 threading.Thread(None,conect,None).start()
 while True :
     if nbPlayer >= 2 and inGame == False :
+        os.system('clear')
         print("Début d'une partie")
         inGame = True
         #Envoie du premier msg => définit J1
@@ -54,8 +61,8 @@ while True :
 
         #Accusé de reception
         while True :
-            ACK_J1 = l[1].recv[1500]
-            ACK_J2 = l[2].recv[1500]
+            ACK_J1 = l[1].recv(1500)
+            ACK_J2 = l[2].recv(1500)
             if ACK_J1.decode("utf-8") == "ACK" :
                 J1_OK = True
             if ACK_J2.decode("utf-8") == "ACK" :
@@ -65,33 +72,48 @@ while True :
 
         #Partie Jeu
         current_player = 1
+        play = bytearray("PLAY", "utf-8")
+        l[current_player].send(play)
         while grid.gameOver() == -1 :
-            data = l[current_player].recv(1500)
+            print("je suis la")
+            data = l[current_player].recv(5000)
             if not data : break
+            elif data.decode("utf-8") == "ACK" :
+                data = l[current_player].recv(5000)
             shot = int(data.decode("utf-8"))
-
             if grid.cells[shot] != 0 :
                 answer = bytearray("NO", "utf-8")
                 l[current_player].send(answer)
+                ACK(current_player)
+                l[current_player].send(play)
             else:
                 answer = bytearray("YES", "utf-8")
                 l[current_player].send(answer)
-                grid.cells[shot] = current_player
                 grid.play(current_player, shot)
-                ACK(l, current_player)
+                ACK(current_player)
                 for i in range(3, nbPlayer): #Pensez à retirer un joueur s'il se déconnecte
                     l[i].send(data)
                 current_player = current_player%2+1
-                msg = bytearray("PLAY", "utf-8")
-                l[current_player].send(msg)
-                ACK(l, current_player)
+                play = bytearray("PLAY", "utf-8")
+                l[current_player].send(play)
 
-        print("GAME OVER")
-        win = bytearray("WIN")
-        loose = bytearray("LOOSE")
-        if grids[0].gameOver() == 1:
+        print("Partie Finie")
+        win = bytearray("WIN", "utf-8")
+        win1 = bytearray("WIN1", "utf-8")
+        win2 = bytearray("WIN2", "utf-8")
+        loose = bytearray("LOOSE", "utf-8")
+        draw = bytearray("DRAW", "utf-8")
+        if grid.gameOver() == 1:
             l[1].send(win)
             l[2].send(loose)
-        else:
+            for i in range(3, nbPlayer):
+                l[i].send(win1)
+        elif grid.gameOver() == 2:
             l[2].send(win)
             l[1].send(loose)
+            for i in range(3, nbPlayer):
+                l[i].send(win2)
+        else :
+            for i in range(1, nbPlayer):
+                l[i].send(draw)
+        
