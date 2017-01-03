@@ -11,6 +11,7 @@ s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 
 try:
     s.connect((sys.argv[1],7777))
+    print("Connecté au serveur de jeu...")
 except Exception as e:
     input("Erreur de connexion au serveur ! Appuyer sur n'importe quelle touche pour sortir")
     sys.exit()
@@ -35,4 +36,4 @@ if whoIAm != "spectator" :
 #Partie spectateur
 else :
     pass
-#s.close()
+s.close()

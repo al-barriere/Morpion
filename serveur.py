@@ -11,14 +11,8 @@ def ACK(l, current_player):
         if ACK.decode("utf-8") == "ACK":
             break;
 
-nbPlayer = 0
-inGame = False
-s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM,0)
-l = []
-clientAddr = []
-grid = grid() # Une seule grille logique
 #Effectue les connexions
-def f():
+def conect():
     while True:
         lSocket = select.select(l,[],[])[0]
         for newS in lSocket:
@@ -31,8 +25,13 @@ def f():
                 global clientAddr
                 clientAddr.append(addr)
                 l.append(otherS)
-                print(l)
-                print(clientAddr)
+
+nbPlayer = 0
+inGame = False
+s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM,0)
+l = []
+clientAddr = []
+grid = grid() # Une seule grille logique
 
 #MAIN
 i=0
@@ -42,7 +41,7 @@ s.listen(1)
 l.append(s)
 os.system('clear')
 print("En attente de joueurs...")
-threading.Thread(None,f,None).start()
+threading.Thread(None,conect,None).start()
 while True :
     if nbPlayer >= 2 and inGame == False :
         print("Début d'une partie")
