@@ -10,7 +10,6 @@ import os
 def ACK(player):
     while True:
         global l
-        print("je suis la")
         ACK = l[player].recv(1500)
         if ACK.decode("utf-8") == "ACK":
             break;
@@ -32,12 +31,24 @@ def connect():
                 if nbPlayer > 2 :
                     msg = bytearray("spectator", "utf-8")
                     otherS.send(msg)
+                    global shotPlayed
+                    if not shotPlayed : break
+                    global whoPayed
+                    otherS.send(bytearray("SHOT", "utf-8"))
+                    for shot in shotPlayed :
+                        otherS.send(bytearray(shot, "utf-8"))
+                    otherS.send(bytearray("END", "utf-8")) 
+                    for player in whoPayed :
+                        otherS.send(bytearray(str(player), "utf-8"))
+                    otherS.send(bytearray("ENDOFEND", "utf-8"))                    
 
 nbPlayer = 0
 inGame = False
 s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM,0)
 l = []
 clientAddr = []
+shotPlayed = []
+whoPayed = []
 grid = grid() # Une seule grille logique
 
 #MAIN
@@ -73,10 +84,9 @@ while True :
 
         #Partie Jeu
         current_player = 1
-        play = bytearray("PLAY", "utf-8")
-        l[current_player].send(play)
         while grid.gameOver() == -1 :
-            print("je suis la")
+            play = bytearray("PLAY", "utf-8")
+            l[current_player].send(play)
             data = l[current_player].recv(5000)
             if not data : break
             elif data.decode("utf-8") == "ACK" :
@@ -89,14 +99,17 @@ while True :
                 l[current_player].send(play)
             else:
                 answer = bytearray("YES", "utf-8")
+                shotPlayed.append(data.decode("utf-8"))
+                whoPayed.append(current_player)
                 l[current_player].send(answer)
                 grid.play(current_player, shot)
+                shotMsg = bytearray(data.decode("utf-8"), "utf-8")
+                os.system('clear')
+                grid.display()
                 ACK(current_player)
-                for i in range(3, nbPlayer): #Pensez à retirer un joueur s'il se déconnecte
-                    l[i].send(data)
+                for i in range(3, nbPlayer+1):
+                    l[i].send(shotMsg)
                 current_player = current_player%2+1
-                play = bytearray("PLAY", "utf-8")
-                l[current_player].send(play)
 
         print("Partie Finie")
         win = bytearray("WIN", "utf-8")
@@ -107,13 +120,13 @@ while True :
         if grid.gameOver() == 1:
             l[1].send(win)
             l[2].send(loose)
-            for i in range(3, nbPlayer):
+            for i in range(3, nbPlayer+1):
                 l[i].send(win1)
         elif grid.gameOver() == 2:
             l[2].send(win)
             l[1].send(loose)
-            for i in range(3, nbPlayer):
+            for i in range(3, nbPlayer+1):
                 l[i].send(win2)
         else :
-            for i in range(1, nbPlayer):
+            for i in range(1, nbPlayer+1):
                 l[i].send(draw)
