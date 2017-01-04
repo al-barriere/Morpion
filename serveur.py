@@ -6,6 +6,7 @@ import binascii
 from grid import *
 import os
 
+#Fonction permettant de recevoir un accusé de réception de la part d'un joueur
 def ACK(player):
     while True:
         global l
@@ -14,8 +15,8 @@ def ACK(player):
         if ACK.decode("utf-8") == "ACK":
             break;
 
-#Effectue les connexions
-def conect():
+#Fonction qui permet d'effectuer les connexions (thread)
+def connect():
     while True:
         lSocket = select.select(l,[],[])[0]
         for newS in lSocket:
@@ -47,7 +48,7 @@ s.listen(1)
 l.append(s)
 os.system('clear')
 print("En attente de joueurs...")
-threading.Thread(None,conect,None).start()
+threading.Thread(None,connect,None).start()
 while True :
     if nbPlayer >= 2 and inGame == False :
         os.system('clear')
@@ -116,4 +117,3 @@ while True :
         else :
             for i in range(1, nbPlayer):
                 l[i].send(draw)
-        

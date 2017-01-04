@@ -35,10 +35,11 @@ print("Vous êtes", whoIAm)
 
 #Partie Joueur
 grid.display()
-if whoIAm != "spectator" :
+if whoIAm != "spectateur" :
     data = s.recv(1500)
     while data.decode("utf-8") != "WIN" or data.decode("utf-8") != "DRAW" or data.decode("utf-8") != "LOOSE" :
-        if data.decode("utf-8") == "PLAY" :      
+        #Partie Jeu
+        if data.decode("utf-8") == "PLAY" :
             shotMsg = input ("Quelle case voulez-vous jouer ?")
             shot = int(shotMsg)
             if shot < 9 or shot > -1 :
@@ -48,6 +49,7 @@ if whoIAm != "spectator" :
                     print("je suis la")
                     data = s.recv(1500)
                     if data.decode("utf-8") == "YES" :
+                        os.system('clear')
                         if whoIAm == "J1":
                             grid.play(1, shot)
                             grid.display()
@@ -62,8 +64,35 @@ if whoIAm != "spectator" :
                     s.send(ACK)
                     print("je suis la")
                     data = s.recv(1500)
+
+    #Fin de la partie
+    print("Partie fini")
+    if data.decode("utf-8") != "WIN" :
+        print("Vous avez gagné !")
+    elif data.decode("utf-8") != "LOOSE" :
+        print("Vous avez perdu !")
+    elif data.decode("utf-8") != "DRAW" :
+        print("Match nul !")
+
+
 #Partie spectateur
 else :
-    while grid.gameOver() == -1 :
-        pass
+    grid.display()
+    current_player = 1
+    data = s.recv(1500)
+    while data.decode("utf-8") != "WIN1" or data.decode("utf-8") != "DRAW" or data.decode("utf-8") != "WIN2" :
+        grid.play(current_player, int(data.decode("utf-8")))
+        os.system('clear')
+        grid.display
+
+    #Fin de la partie
+    print("Partie fini")
+    if data.decode("utf-8") != "WIN" :
+        print("Vous avez gagné !")
+    elif data.decode("utf-8") != "LOOSE" :
+        print("Vous avez perdu !")
+    elif data.decode("utf-8") != "DRAW" :
+        print("Match nul !")
+
+
 s.close()
