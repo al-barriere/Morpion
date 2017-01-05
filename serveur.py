@@ -6,6 +6,34 @@ import binascii
 from grid import *
 import os
 
+def sendAgain(s, position):
+    global again
+    s.send(again)
+    answer = s.recv(1500)
+    if answer.decode("utf-8") == "NO" :
+        global l
+        del l[position]
+        nbPlayer -= 1
+
+def sendShot(otherS):
+    global shotPlayed
+    if shotPlayed : 
+        global whoPayed
+        otherS.send(bytearray("SHOT", "utf-8"))
+        msg = otherS.recv(1500)
+        for shot in shotPlayed :
+            otherS.send(bytearray(shot, "utf-8"))
+            msg = otherS.recv(1500)
+        otherS.send(bytearray("END", "utf-8"))
+        data = otherS.recv(1500)
+        for player in whoPayed :
+            otherS.send(bytearray(str(player), "utf-8"))
+            data = otherS.recv(1500)
+        otherS.send(bytearray("ENDOFEND", "utf-8"))  
+        data = otherS.recv(1500)
+        global current_player
+        otherS.send(bytearray(str(current_player), "utf-8")) 
+
 #Fonction permettant de recevoir un accusé de réception de la part d'un joueur
 def ACK(player):
     while True:
@@ -25,28 +53,32 @@ def connect():
                 nbPlayer += 1
                 otherS, addr = newS.accept()
                 global l
-                global clientAddr
-                clientAddr.append(addr)
                 l.append(otherS)
                 if nbPlayer > 2 :
                     msg = bytearray("spectator", "utf-8")
                     otherS.send(msg)
-                    global shotPlayed
-                    if not shotPlayed : break
-                    global whoPayed
-                    otherS.send(bytearray("SHOT", "utf-8"))
-                    for shot in shotPlayed :
-                        otherS.send(bytearray(shot, "utf-8"))
-                    otherS.send(bytearray("END", "utf-8")) 
-                    for player in whoPayed :
-                        otherS.send(bytearray(str(player), "utf-8"))
-                    otherS.send(bytearray("ENDOFEND", "utf-8"))                    
+                    tmp = otherS.recv(1500)
+                    sendShot(otherS)
+                    if winTest1 :
+                        global win1
+                        otherS.send(win1)
+                    if winTest2 :
+                        global win2
+                        otherS.send(win2)
+                    if winDraw :
+                        global draw
+                        otherS.send(draw)
+                        
 
 nbPlayer = 0
+
+winTest1 = False
+winTest2 = False
+winDraw = False
+
 inGame = False
 s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM,0)
 l = []
-clientAddr = []
 shotPlayed = []
 whoPayed = []
 grid = grid() # Une seule grille logique
@@ -118,15 +150,29 @@ while True :
         loose = bytearray("LOOSE", "utf-8")
         draw = bytearray("DRAW", "utf-8")
         if grid.gameOver() == 1:
+            winTest1 = True
             l[1].send(win)
             l[2].send(loose)
             for i in range(3, nbPlayer+1):
                 l[i].send(win1)
         elif grid.gameOver() == 2:
+            winTest2 = True
             l[2].send(win)
             l[1].send(loose)
             for i in range(3, nbPlayer+1):
                 l[i].send(win2)
         else :
+            winDraw = True
             for i in range(1, nbPlayer+1):
                 l[i].send(draw)
+        sendShot(l[1])
+        sendShot(l[2]) 
+
+        again = bytearray("AGAIN", "utf-8")
+        thread = []
+        for i in range(1, nbPlayer):
+            print("Joueur" ,i)
+            thread.append(threading.Thread(None,sendAgain,l[i],i,None))
+            thread[i].start()
+        for i in range(1, nbPlayer):
+            thread[i].join()
