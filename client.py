@@ -11,6 +11,7 @@ def getShot(grid) :
     global s
     global ACK
     data = s.recv(1500)
+
     if data.decode("utf-8") == "SHOT":
         s.send(ACK)
         shotPlayed = []
@@ -33,11 +34,16 @@ def getShot(grid) :
         global current_player
         current_player = int(data.decode("utf-8"))
 
-os.system('clear')
-print("Bienvenue sur le morpion aveugle !")
-print("1 : Jouez en réseaux")
-print("2 : Jouez contre un ordi")
-choix = int(input("Choix ? "))
+choix = 0
+while choix != 1 and choix != 2 :
+    os.system('clear')
+    print("Bienvenue sur le morpion aveugle !")
+    print("1 : Jouez en réseaux")
+    print("2 : Jouez contre un ordi")
+    try :
+        choix = int(input("Choix ? "))
+    except Exception as e:
+        pass
 
 if choix == 2:
     main()
@@ -57,7 +63,7 @@ else :
             print("Erreur de connexion au serveur !")
 
     again = True
-    while again == True :
+    while again == True : 
         while True:
             data = s.recv(1500)
             if data.decode("utf-8") == "J1" :
@@ -149,18 +155,22 @@ else :
         if data.decode("utf-8") == "AGAIN" :
             choix = 0
             choixMsg = ""
-            while choix != 1 or choix != 2 :
+            while choix != 1 and choix != 2 :
                 print("Voulez vous recommencer une partie ?")
                 print("1 : Oui")
                 print("2 : Non")
                 choixMsg = input("Choix : ")
-                choix = int(choixMsg)
+                try :
+                    choix = int(choixMsg)
+                except Exception as e:
+                    pass
             if choix == 1 :
                 choixEnvoi = bytearray("YES", "utf-8")
                 again = True
                 s.send(choixEnvoi)
+                gridFinal = grid()
+                gridGraphic = grid()
             else :
                 choixEnvoi = bytearray("NO", "utf-8")
                 s.send(choixEnvoi)
                 s.close()
-        s.close()
